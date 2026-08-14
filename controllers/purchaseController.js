@@ -4,18 +4,27 @@ const Wholesaler = require('../models/Wholesaler');
 
 exports.createPurchase = async (req, res) => {
     try {
-        const { flowerId, wholesalerId, quantity, unit, purchasePrice, sellingPrice, totalAmount, date } = req.body;
+        const { flowerName, wholesalerId, quantity, unit, purchasePrice, sellingPrice, totalAmount, paidAmount, pendingAmount, date } = req.body;
         const userId = req.user._id;
+
+        // Find or create flower
+        const Flower = require('../models/Flower');
+        let flower = await Flower.findOne({ userId, flowerName: { $regex: new RegExp(`^${flowerName}$`, 'i') } });
+        if (!flower) {
+            flower = new Flower({ userId, flowerName, unit, purchasePrice, sellingPrice: sellingPrice || purchasePrice * 1.5 });
+            await flower.save();
+        }
+        const flowerId = flower._id;
 
         const purchase = new Purchase({
             userId,
             flowerId,
             wholesalerId,
             quantity,
-            unit,
             purchasePrice,
-            sellingPrice,
             totalAmount,
+            paidAmount: paidAmount || 0,
+            pendingAmount: pendingAmount || totalAmount - (paidAmount || 0),
             date
         });
         await purchase.save();

@@ -2,7 +2,26 @@ const Stock = require('../models/Stock');
 
 exports.create = async (req, res) => {
   try {
-    const item = await Stock.create({ ...req.body, userId: req.user._id });
+    const { flowerName, availableQuantity, unit, purchasePrice, sellingPrice, minimumStockLevel } = req.body;
+    const userId = req.user._id;
+
+    // Find or create flower
+    const Flower = require('../models/Flower');
+    let flower = await Flower.findOne({ userId, flowerName: { $regex: new RegExp(`^${flowerName}$`, 'i') } });
+    if (!flower) {
+        flower = new Flower({ userId, flowerName, unit, purchasePrice, sellingPrice });
+        await flower.save();
+    }
+    const flowerId = flower._id;
+
+    const item = await Stock.create({ 
+      userId, 
+      flowerId, 
+      availableQuantity, 
+      unit, 
+      purchasePrice, 
+      sellingPrice 
+    });
     res.status(201).json(item);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,8 +30,14 @@ exports.create = async (req, res) => {
 
 exports.getAll = async (req, res) => {
   try {
-    const items = await Stock.find({ userId: req.user._id });
-    res.json(items);
+    const items = await Stock.find({ userId: req.user._id }).populate('flowerId');
+    const formattedItems = items.map(item => {
+      const obj = item.toObject();
+      obj.flowerName = obj.flowerId ? obj.flowerId.flowerName : 'Unknown';
+      obj.id = obj._id;
+      return obj;
+    });
+    res.json(formattedItems);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
