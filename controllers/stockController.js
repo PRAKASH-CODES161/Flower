@@ -7,7 +7,7 @@ exports.create = async (req, res) => {
 
     // Find or create flower
     const Flower = require('../models/Flower');
-    let flower = await Flower.findOne({ userId, flowerName: { $regex: new RegExp(`^${flowerName}$`, 'i') } });
+    let flower = await Flower.findOne({ userId, flowerName: flowerName }).collation({ locale: 'en', strength: 2 });
     if (!flower) {
         flower = new Flower({ userId, flowerName, unit, purchasePrice, sellingPrice });
         await flower.save();
