@@ -43,7 +43,7 @@ exports.createSale = async (req, res) => {
         // Create SalesItems
         const salesItems = items.map(item => ({
             userId,
-            saleId: sale._id,
+            billId: sale._id,
             flowerId: item.flowerId,
             quantity: item.quantity,
             sellingPrice: item.sellingPrice
@@ -71,7 +71,7 @@ exports.getSaleById = async (req, res) => {
         const sale = await Sale.findOne({ _id: req.params.id, userId: req.user._id });
         if (!sale) return res.status(404).json({ error: 'Sale not found' });
         
-        const items = await SalesItem.find({ saleId: sale._id }).populate('flowerId');
+        const items = await SalesItem.find({ billId: sale._id }).populate('flowerId');
         res.status(200).json({ sale, items });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch sale' });
@@ -83,7 +83,7 @@ exports.deleteSale = async (req, res) => {
         const sale = await Sale.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
         if (!sale) return res.status(404).json({ error: 'Sale not found' });
         
-        await SalesItem.deleteMany({ saleId: sale._id });
+        await SalesItem.deleteMany({ billId: sale._id });
         res.status(200).json({ message: 'Sale deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete sale' });
