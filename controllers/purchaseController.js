@@ -60,7 +60,7 @@ exports.createPurchase = async (req, res) => {
         res.status(201).json({ message: 'Purchase created successfully', purchase });
     } catch (error) {
         console.error('Error creating purchase:', error);
-        res.status(500).json({ error: 'Failed to create purchase' });
+        res.status(500).json({ error: error.message || 'Failed to create purchase' });
     }
 };
 
