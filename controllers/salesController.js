@@ -4,7 +4,7 @@ const Stock = require('../models/Stock');
 
 exports.createSale = async (req, res) => {
     try {
-        const { customerName, mobileNumber, date, totalAmount, discount, finalAmount, items } = req.body;
+        const { customerName, mobileNumber, date, totalAmount, discount, finalAmount, items, paidAmount, balanceAmount, paymentMethod } = req.body;
         const userId = req.user._id;
 
         if (!items || items.length === 0) {
@@ -30,12 +30,13 @@ exports.createSale = async (req, res) => {
         // Create Sale
         const sale = new Sale({
             userId,
+            billNumber: 'BILL-' + Date.now().toString().slice(-6),
             customerName,
-            mobileNumber,
-            date,
-            totalAmount,
-            discount,
-            finalAmount
+            totalAmount: finalAmount, // Use finalAmount from frontend as totalAmount for the schema
+            paidAmount: paidAmount || 0,
+            balanceAmount: balanceAmount || 0,
+            paymentMethod: paymentMethod || 'Cash',
+            date
         });
         await sale.save();
 
@@ -52,7 +53,7 @@ exports.createSale = async (req, res) => {
         res.status(201).json({ message: 'Sale created successfully', sale });
     } catch (error) {
         console.error('Error creating sale:', error);
-        res.status(500).json({ error: 'Failed to create sale' });
+        res.status(500).json({ error: error.stack || String(error) });
     }
 };
 
