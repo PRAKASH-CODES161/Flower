@@ -5,9 +5,11 @@ const orderSchema = new mongoose.Schema({
   customerName: { type: String, required: true },
   mobileNumber: { type: String, required: true },
   flowerName: { type: String, required: true },
+  flowerDetails: { type: String },
   garlandType: { type: String },
   quantity: { type: Number, required: true },
   deliveryDate: { type: Date, required: true },
+  orderTotal: { type: Number, required: true },
   advanceAmount: { type: Number, required: true },
   balanceAmount: { type: Number, required: true },
   status: { type: String, required: true }
